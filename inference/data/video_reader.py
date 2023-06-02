@@ -15,7 +15,7 @@ class VideoReader(Dataset):
     """
     This class is used to read a video, one frame at a time
     """
-    def __init__(self, vid_name, image_dir, mask_dir, size=-1, to_save=None, use_all_mask=False, size_dir=None):
+    def __init__(self, vid_name, image_dir, mask_dir, gt_dir, size=-1, to_save=None, use_all_mask=False, size_dir=None):
         """
         image_dir - points to a directory of jpg images
         mask_dir - points to a directory of png masks
@@ -28,6 +28,7 @@ class VideoReader(Dataset):
         self.vid_name = vid_name
         self.image_dir = image_dir
         self.mask_dir = mask_dir
+        self.gt_dir = gt_dir
         self.to_save = to_save
         self.use_all_mask = use_all_mask
         if size_dir is None:
@@ -71,14 +72,23 @@ class VideoReader(Dataset):
             shape = np.array(size_im).shape[:2]
 
         gt_path = path.join(self.mask_dir, frame[:-4]+'.png')
+        all_gt_path = path.join(self.gt_dir, frame[:-4]+'.png')
+
         img = self.im_transform(img)
 
         load_mask = self.use_all_mask or (gt_path == self.first_gt_path)
         if load_mask and path.exists(gt_path):
-            mask = Image.open(gt_path).convert('P')
-            mask = np.array(mask, dtype=np.uint8)
+            #mask = Image.open(gt_path).convert('P')
+            mask = Image.open(gt_path)
+            mask = np.array(mask)
+            mask = mask.astype(np.uint8)
             data['mask'] = mask
 
+        gt = Image.open(all_gt_path)
+        gt = np.array(gt)
+        gt = gt.astype(np.uint8)
+
+        data['gt'] = gt
         info['shape'] = shape
         info['need_resize'] = not (self.size < 0)
         data['rgb'] = img

@@ -33,14 +33,17 @@ class DAVISTestDataset:
         if size != 480:
             self.image_dir = path.join(data_root, 'JPEGImages', 'Full-Resolution')
             self.mask_dir = path.join(data_root, 'Annotations', 'Full-Resolution')
+            self.gt_dir = path.join(data_root, 'GTruth', 'Full-Resolution')
             if not path.exists(self.image_dir):
                 print(f'{self.image_dir} not found. Look at other options.')
                 self.image_dir = path.join(data_root, 'JPEGImages', '1080p')
                 self.mask_dir = path.join(data_root, 'Annotations', '1080p')
+                self.gt_dir = path.join(data_root, 'GTruth', '1080p')
             assert path.exists(self.image_dir), 'path not found'
         else:
             self.image_dir = path.join(data_root, 'JPEGImages', '480p')
             self.mask_dir = path.join(data_root, 'Annotations', '480p')
+            self.gt_dir = path.join(data_root, 'GTruth', '480p')
         self.size_dir = path.join(data_root, 'JPEGImages', '480p')
         self.size = size
 
@@ -52,6 +55,7 @@ class DAVISTestDataset:
             yield VideoReader(video, 
                 path.join(self.image_dir, video), 
                 path.join(self.mask_dir, video),
+                path.join(self.gt_dir, video),
                 size=self.size,
                 size_dir=path.join(self.size_dir, video),
             )

@@ -5,3 +5,7 @@ git+https://github.com/cheind/py-thin-plate-spline
 hickle
 tensorboard
 numpy
+torch==1.8.1
+torchvision==0.9.1
+tensorboard==2.11.2
+opencv-python>=4.1.1

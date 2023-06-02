@@ -162,11 +162,14 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
     mapper = MaskMapper()
     processor = InferenceCore(network, config=config)
     first_mask_loaded = False
+    running_intersection = 0
+    running_union = 0
 
     for ti, data in enumerate(loader):
         with torch.cuda.amp.autocast(enabled=not args.benchmark):
             rgb = data['rgb'].cuda()[0]
             msk = data.get('mask')
+            gt = data['gt'].squeeze().cuda()
             info = data['info']
             frame = info['frame'][0]
             shape = info['shape']
@@ -193,15 +196,19 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
                 msk = torch.flip(msk, dims=[-1]) if msk is not None else None
 
             # Map possibly non-continuous labels to continuous ones
+            #print(f"shape of mask: {msk.shape}")
             if msk is not None:
+                #print("before: ", np.unique(msk.numpy()), msk.shape)
                 msk, labels = mapper.convert_mask(msk[0].numpy())
                 msk = torch.Tensor(msk).cuda()
+                #print("after: ", np.unique(msk.cpu()))
+                #print(f"mask after conversion: {np.unique(msk.cpu())}, shape: {msk.shape}")
                 if need_resize:
                     msk = vid_reader.resize_mask(msk.unsqueeze(0))[0]
                 processor.set_all_labels(list(mapper.remappings.values()))
             else:
                 labels = None
-
+                
             # Run the model on this frame
             prob = processor.step(rgb, msk, labels, end=(ti==vid_length-1))
 
@@ -219,7 +226,18 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
 
             # Probability mask -> index mask
             out_mask = torch.argmax(prob, dim=0)
+
             out_mask = (out_mask.detach().cpu().numpy()).astype(np.uint8)
+            gt = (gt.detach().cpu().numpy()).astype(np.uint8)
+            #print(f"gt: {np.unique(gt)}, out_mask: {np.unique(out_mask)}")
+            #gt[gt != 0] = 255
+            #out_mask[out_mask != 0] = 255
+            intersection = np.sum(out_mask & gt)
+            union = np.sum(out_mask | gt)
+
+            # Accumulate the intersection and union over all frames
+            running_intersection += intersection
+            running_union += union
 
             if args.save_scores:
                 prob = (prob.detach().cpu().numpy()*255).astype(np.uint8)
@@ -229,6 +247,7 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
                 this_out_path = path.join(out_path, vid_name)
                 os.makedirs(this_out_path, exist_ok=True)
                 out_mask = mapper.remap_index_mask(out_mask)
+                #print(f"After remapping_index, out_mask: {np.unique(out_mask)}")
                 out_img = Image.fromarray(out_mask)
                 if vid_reader.get_palette() is not None:
                     out_img.putpalette(vid_reader.get_palette())
@@ -241,7 +260,10 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
                     hkl.dump(mapper.remappings, path.join(np_path, f'backward.hkl'), mode='w')
                 if args.save_all or info['save'][0]:
                     hkl.dump(prob, path.join(np_path, f'{frame[:-4]}.hkl'), mode='w', compression='lzf')
-
+    # Compute the overall IoU for the video
+    overall_iou = running_intersection / running_union
+    print(f"overall_iou: {overall_iou}")
+        
 
 print(f'Total processing time: {total_process_time}')
 print(f'Total processed frames: {total_frames}')
