@@ -3,7 +3,6 @@ gdown
 gitpython
 git+https://github.com/cheind/py-thin-plate-spline
 hickle
-tensorboard
 numpy
 torch==1.8.1
 torchvision==0.9.1

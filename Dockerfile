@@ -22,24 +22,8 @@ RUN apt update || true \
 RUN python3.9 -m pip install --upgrade pip && python3.9 -m pip install -r requirements.txt
 RUN CC="cc -mavx2" pip install -U --force-reinstall pillow-simd
 WORKDIR /app
+RUN mkdir saves && cd saves && wget https://github.com/hkchengrex/XMem/releases/download/v1.0/XMem-s012.pth
 
-#RUN wget https://www.dropbox.com/s/4j4z58wuv8o0mfz/models.zip && unzip models.zip
+CMD sh -c 'python eval.py  --d17_path /DAVIS/2017 --split test --model ./saves/XMem-s012.pth --output ./output'
 
-#RUN echo "/usr/local/lib" >> /etc/ld.so.conf.d/opencv.conf
-#RUN ldconfig
-#RUN python3.7 -m pip install -r requirements.txt
-
-# docker run --gpus all -it -v  c:\Users\ge79pih\color\color:/app/color raft_optical_map_running /bin/bash
-#docker run -e MODEL_PATH=models/my_model.pth \
-#           -e DATASET_PATH=/datasets \
-#           -e OUTPUT_PATH=/output \
-#           -v c:\Users\ge79pih\color\color\custom_png_data:/datasets \
-#           -v c:\Users\ge79pih\color\color\demo_output:/output \
-#           --gpus all
-#           raft
-
-#CMD sh -c 'python3.8 evaluate.py --model=$MODEL_PATH --dataset-path=$DATASET_PATH --output-path=$OUTPUT_PATH'
-
-#CMD ["python3.8", "evaluate.py", "--model=$MODEL_PATH", "--dataset-path=$DATASET_PATH", "--output-path=$OUTPUT_PATH"]
-
-#docker run -it --rm -v C:\Users\ge79pih\tmo_data\rdevos-dataset:/app/datasets/test-dev/ -v C:\Users\ge79pih\tmo_data\rde-output:/app/output --gpus all --shm-size=2gb rde-vos bash
+# docker run -it --rm -v C:\Users\ge79pih\tmo_data\rdevos-dataset:/DAVIS/2017/test-dev/ -v C:\Users\ge79pih\tmo_data\rde-output:/app/output --gpus all --shm-size=2gb xmem bash
