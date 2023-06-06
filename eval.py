@@ -262,6 +262,7 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
             out_mask = torch.argmax(prob, dim=0)
 
             out_mask = (out_mask.detach().cpu().numpy()).astype(np.uint8)
+            out_mask[out_mask != 0] = 1
             gt = (gt.detach().cpu().numpy()).astype(np.uint8)
             print(f"out_mask: {np.unique(out_mask)}, gt: {np.unique(gt)}")
             #gt[gt != 0] = 255
