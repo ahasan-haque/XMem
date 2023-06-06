@@ -73,6 +73,7 @@ if args.output is None:
 """
 Path Preparation
 """
+"""
 directory_path = "/DAVIS/2017/test-dev"
 subdirectories = ["Annotations", "GTruth", "ImageSets", "JPEGImages"]
 os.makedirs(os.path.join(directory_path, 'JPEGImages', '480p'), exist_ok=True)
@@ -103,7 +104,7 @@ for scene_name in os.listdir('/images'):
         os.path.join(directory_path, 'GTruth', '480p', scene_name, '00000.png'),
         os.path.join(directory_path, 'Annotations', '480p', scene_name, '00000.png')
     )
-
+"""
 """
 Data preparation
 """
