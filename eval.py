@@ -263,7 +263,7 @@ for vid_reader in progressbar(meta_loader, max_value=len(meta_dataset), redirect
 
             out_mask = (out_mask.detach().cpu().numpy()).astype(np.uint8)
             gt = (gt.detach().cpu().numpy()).astype(np.uint8)
-            #print(f"gt: {np.unique(gt)}, out_mask: {np.unique(out_mask)}")
+            print(f"out_mask: {np.unique(out_mask)}, gt: {np.unique(gt)}")
             #gt[gt != 0] = 255
             #out_mask[out_mask != 0] = 255
             intersection = np.sum(out_mask & gt)
