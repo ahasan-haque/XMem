@@ -73,7 +73,8 @@ if args.output is None:
 """
 Path Preparation
 """
-"""
+
+# Create the directory structure for DAVIS
 directory_path = "/DAVIS/2017/test-dev"
 subdirectories = ["Annotations", "GTruth", "ImageSets", "JPEGImages"]
 os.makedirs(os.path.join(directory_path, 'JPEGImages', '480p'), exist_ok=True)
@@ -82,29 +83,31 @@ os.makedirs(os.path.join(directory_path, 'GTruth', '480p'), exist_ok=True)
 os.makedirs(os.path.join(directory_path, 'ImageSets', '2017'), exist_ok=True)
 
 scene_names = os.listdir('/images')
+
+# Create the ImageSets
 with open(os.path.join(directory_path, 'ImageSets', '2017', 'test-dev.txt'), 'a+') as f:
     f.write('\n'.join(scene_names))
 
 
+# Copy the images
 for scene_name in os.listdir('/images'):
     src_path = os.path.join('/images', scene_name)
     dst_path = os.path.join(directory_path, 'JPEGImages', '480p', scene_name)
     shutil.copytree(src_path, dst_path)
 
-
+# Copy the ground truths
 for scene_name in os.listdir('/gt'):
     src_path = os.path.join('/gt', scene_name)
     dst_path = os.path.join(directory_path, 'GTruth', '480p', scene_name)
     shutil.copytree(src_path, dst_path)
 
-
-for scene_name in os.listdir('/images'):
+# Copy the annotations
+for scene_name in os.listdir('/annotations'):
     os.makedirs(os.path.join(directory_path, 'Annotations', '480p', scene_name), exist_ok=True)
     shutil.copy(
-        os.path.join(directory_path, 'GTruth', '480p', scene_name, '00000.png'),
+        f'/annotations/{scene_name}/00000.png',
         os.path.join(directory_path, 'Annotations', '480p', scene_name, '00000.png')
     )
-"""
 """
 Data preparation
 """
