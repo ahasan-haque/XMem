@@ -77,7 +77,7 @@ Path Preparation
 # Create the directory structure for DAVIS
 directory_path = "/DAVIS/2017/test-dev"
 subdirectories = ["Annotations", "GTruth", "ImageSets", "JPEGImages"]
-os.mkdir(directory_path, exist_ok=True)
+os.makedirs(directory_path, exist_ok=True)
 os.makedirs(os.path.join(directory_path, 'JPEGImages', '480p'), exist_ok=True)
 os.makedirs(os.path.join(directory_path, 'Annotations', '480p'), exist_ok=True)
 os.makedirs(os.path.join(directory_path, 'GTruth', '480p'), exist_ok=True)
